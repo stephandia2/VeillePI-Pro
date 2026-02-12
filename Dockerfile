@@ -3,6 +3,9 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Installer curl pour healthcheck
+RUN apk add --no-cache curl
+
 # Copier les fichiers de dépendances
 COPY package*.json ./
 COPY prisma ./prisma/
@@ -25,6 +28,9 @@ FROM node:20-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
+
+# Installer curl pour healthcheck
+RUN apk add --no-cache curl
 
 # Copier les fichiers nécessaires
 COPY --from=builder /app/package*.json ./
