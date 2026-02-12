@@ -1,5 +1,4 @@
-# Build stage
-FROM node:20-alpine AS builder
+FROM node:20-alpine
 
 WORKDIR /app
 
@@ -11,25 +10,12 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-# Production stage
-FROM node:20-alpine AS runner
+EXPOSE 3000
 
-WORKDIR /app
-
-ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
-
-RUN apk add --no-cache curl
-
-# Copy standalone output
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/public ./public
-
-EXPOSE 3000
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD curl -f http://localhost:3000/api/health || exit 1
 
-CMD ["node", "server.js"]
+CMD ["npm", "start"]
