@@ -1,26 +1,9 @@
 version: '3.8'
 
 services:
-  web:
+  app:
     build: .
-    container_name: veillepi-pro
+    container_name: agence-stephane-quentin
     ports:
-      - '8150:3000'
-    environment:
-      - NODE_ENV=production
-      - PORT=3000
-      - HOSTNAME=0.0.0.0
-      - DATABASE_URL=${DATABASE_URL}
-      - DIRECT_URL=${DIRECT_URL}
-      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
-      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
-      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
-      - BRAVE_API_KEY=${BRAVE_API_KEY}
-      - KIMI_API_KEY=${KIMI_API_KEY}
-      - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
+      - "8015:80"
     restart: unless-stopped
-    healthcheck:
-      test: ['CMD', 'wget', '-q', '--spider', 'http://localhost:3000/api/health']
-      interval: 30s
-      timeout: 10s
-      retries: 3
