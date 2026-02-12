@@ -2,23 +2,15 @@ version: '3.8'
 
 services:
   veillepi:
-    image: node:20-alpine
+    build:
+      context: ./app
+      dockerfile: Dockerfile
     container_name: veillepi-prod
-    working_dir: /app
     ports:
-      - "8200:3000"
+      - "2001:3000"
     environment:
       - NODE_ENV=production
       - PORT=3000
       - HOSTNAME=0.0.0.0
-    volumes:
-      - ./:/app
-    command: >
-      sh -c "npm install && npm run build && npm start"
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
+    restart: always
+    command: sh -c "npm run start"
