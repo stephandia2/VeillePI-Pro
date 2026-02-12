@@ -1,26 +1,36 @@
-# Build simple sans multi-stage pour debug
-FROM node:20-alpine
+# Build stage
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Installer curl
 RUN apk add --no-cache curl
 
-# Copier tous les fichiers
-COPY . .
-
-# Installer les dépendances
+COPY package*.json ./
 RUN npm ci
 
-# Générer Prisma
-RUN npx prisma generate
+COPY . .
+RUN npm run build
 
-# Build avec logs détaillés
-RUN npm run build 2>&1 || (echo "BUILD FAILED" && exit 1)
+# Production stage
+FROM node:20-alpine AS runner
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+RUN apk add --no-cache curl
+
+# Copy standalone output
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/public ./public
 
 EXPOSE 3000
+
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD curl -f http://localhost:3000/api/health || exit 1
 
-CMD ["npm", "start"]
+CMD ["node", "server.js"]
