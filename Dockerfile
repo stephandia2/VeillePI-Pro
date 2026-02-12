@@ -3,6 +3,11 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Arguments pour les variables d'environnement au build
+ARG NEXT_PUBLIC_SUPABASE_URL
+ARG NEXT_PUBLIC_SUPABASE_ANON_KEY
+ARG NEXT_PUBLIC_APP_URL
+
 # Installer curl pour healthcheck
 RUN apk add --no-cache curl
 
@@ -19,7 +24,11 @@ RUN npx prisma generate
 # Copier le reste du code
 COPY . .
 
-# Build de l'application
+# Build de l'application (avec les vars d'env)
+ENV NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
+ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
+ENV NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
+
 RUN npm run build
 
 # Étape 2 : Production
