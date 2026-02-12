@@ -1,9 +1,24 @@
 version: '3.8'
 
 services:
-  app:
-    build: .
-    container_name: agence-stephane-quentin
+  veillepi:
+    image: node:20-alpine
+    container_name: veillepi-prod
+    working_dir: /app
     ports:
-      - "8015:80"
+      - "8200:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOSTNAME=0.0.0.0
+    volumes:
+      - ./:/app
+    command: >
+      sh -c "npm install && npm run build && npm start"
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
