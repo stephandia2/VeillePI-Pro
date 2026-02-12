@@ -39,7 +39,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchArticles(query);
-  }, []);
+  }, [query]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -84,7 +84,7 @@ export default function Dashboard() {
         {/* Stats */}
         {!loading && !error && (
           <div className="mb-6 text-sm text-gray-500">
-            {articles.length} article{articles.length > 1 ? 's' : ''} trouvé{articles.length > 1 ? 's' : ''} pour "{query}"
+            {articles.length} article{articles.length > 1 ? 's' : ''} trouvé{articles.length > 1 ? 's' : ''} pour &ldquo;{query}&rdquo;
           </div>
         )}
 
