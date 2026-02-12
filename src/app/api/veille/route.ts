@@ -70,7 +70,7 @@ async function searchBraveNews(query: string, count: number = 10): Promise<Brave
     return [];
   }
 
-  return data.results.map((item: any) => ({
+  return data.results.map((item: { title?: string; description?: string; url?: string; meta?: { url?: { hostname?: string }; thumbnail?: { src?: string } }; source?: string; age?: string }) => ({
     title: item.title || '',
     description: item.description || '',
     url: item.url || '',
@@ -146,9 +146,9 @@ function detectLanguage(title: string): string {
   const titleLower = title.toLowerCase();
   const words = titleLower.split(/\s+/);
   
-  let frCount = words.filter(w => frWords.includes(w)).length;
-  let enCount = words.filter(w => enWords.includes(w)).length;
-  let esCount = words.filter(w => esWords.includes(w)).length;
+  const frCount = words.filter(w => frWords.includes(w)).length;
+  const enCount = words.filter(w => enWords.includes(w)).length;
+  const esCount = words.filter(w => esWords.includes(w)).length;
   
   if (frCount > enCount && frCount > esCount) return 'fr';
   if (enCount > frCount && enCount > esCount) return 'en';
@@ -207,21 +207,8 @@ export async function POST(request: NextRequest) {
 
     console.log(`📊 ${uniqueArticles.length} articles uniques trouvés (après déduplication)`);
 
-    // Récupérer ou créer l'utilisateur par défaut
-    let user = await prisma.user.findFirst({
-      where: { email: process.env.USER_EMAIL || 'nihel@eabpa.fr' }
-    });
-
-    if (!user) {
-      user = await prisma.user.create({
-        data: {
-          email: process.env.USER_EMAIL || 'nihel@eabpa.fr',
-          name: process.env.USER_NAME || 'Nihel Ben Ali',
-          clientEmail: process.env.USER_EMAIL || 'nihel@eabpa.fr'
-        }
-      });
-      console.log(`👤 Utilisateur créé: ${user.email}`);
-    }
+    // Utilisateur par défaut (Nihel)
+    const userId = 'nihel-eabpa-001';
 
     // Sauvegarde en base de données
     const savedArticles = [];
@@ -256,7 +243,7 @@ export async function POST(request: NextRequest) {
             keywords,
             language,
             relevanceScore: 0, // Sera calculé plus tard par IA
-            userId: user.id
+            userId: userId
           }
         });
 
@@ -309,20 +296,14 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get('category');
     const language = searchParams.get('language');
 
-    const where: any = {};
+    const where: { category?: string; language?: string } = {};
     if (category) where.category = category;
     if (language) where.language = language;
 
     const articles = await prisma.article.findMany({
       where,
       orderBy: { publishedAt: 'desc' },
-      take: limit,
-      include: {
-        tags: true,
-        _count: {
-          select: { posts: true }
-        }
-      }
+      take: limit
     });
 
     return NextResponse.json({
